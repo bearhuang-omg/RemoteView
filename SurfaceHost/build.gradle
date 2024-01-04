@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.demo'
+    namespace 'com.example.surfacehost'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.demo"
+        applicationId "com.example.surfacehost"
         minSdk 30
         targetSdk 34
         versionCode 1
@@ -63,5 +63,4 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
-//    implementation 'com.google.android.gms:play-services-ads:22.4.0'
 }

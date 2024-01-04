@@ -3,6 +3,21 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven {
+            allowInsecureProtocol true
+            url 'http://artifactory.rnd.meizu.com/artifactory/thirdparty'
+        }
+        maven {
+            allowInsecureProtocol true
+            url 'http://artifactory.rnd.meizu.com/artifactory/all'
+        }
+        maven {
+            allowInsecureProtocol true
+            url "http://artifactory.rnd.meizu.com/artifactory/libs-debug-local"
+        }
+        maven {
+            url "https://maven.aliyun.com/repository/public"
+        }
     }
 }
 dependencyResolutionManagement {
@@ -10,8 +25,26 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        gradlePluginPortal()
+        maven {
+            allowInsecureProtocol true
+            url 'http://artifactory.rnd.meizu.com/artifactory/thirdparty'
+        }
+        maven {
+            allowInsecureProtocol true
+            url 'http://artifactory.rnd.meizu.com/artifactory/all'
+        }
+        maven {
+            allowInsecureProtocol true
+            url "http://artifactory.rnd.meizu.com/artifactory/libs-debug-local"
+        }
+        maven {
+            url "https://maven.aliyun.com/repository/public"
+        }
     }
 }
 
 rootProject.name = "Demo"
 include ':app'
+include ':SurfaceHost'
+include ':SurfaceClient'

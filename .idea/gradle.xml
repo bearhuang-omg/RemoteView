@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/RemoteView" />
+            <option value="$PROJECT_DIR$/RemoteViewHost" />
             <option value="$PROJECT_DIR$/SurfaceClient" />
             <option value="$PROJECT_DIR$/SurfaceHost" />
             <option value="$PROJECT_DIR$/app" />

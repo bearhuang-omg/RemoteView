@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.demo.ui.theme.DemoTheme
-import com.google.android.gms.ads.MobileAds
 import dalvik.system.DexClassLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -52,9 +51,7 @@ class MainActivity : ComponentActivity() {
     }
 
     fun initSDK(){
-        MobileAds.initialize(this){
 
-        }
     }
 
     fun showToast(content:String){

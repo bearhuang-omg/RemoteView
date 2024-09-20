@@ -48,3 +48,4 @@ rootProject.name = "Demo"
 include ':app'
 include ':SurfaceHost'
 include ':SurfaceClient'
+include ':RemoteView'

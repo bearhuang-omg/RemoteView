@@ -63,5 +63,7 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+    implementation project(":RemoteView")
+    implementation project(":RemoteViewHost")
 //    implementation 'com.google.android.gms:play-services-ads:22.4.0'
 }

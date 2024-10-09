@@ -133,7 +133,7 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
     private suspend fun bindClient(): Boolean {
         return suspendCoroutine { continuation ->
             val bundle = Bundle()
-            bundle.putString(Constant.Request.CMDER, Constant.Request.BIND_SERVICE)
+            bundle.putString(Constant.Request.CMDER, Constant.Request.BIND_CLIENT)
             bundle.putBinder(Constant.Parms.CLIENT_BINDER, mClientBinder.asBinder())
             callService(bundle) { result: Bundle? ->
                 val code = result?.getInt(Constant.Response.RESULT_CODE)
@@ -200,7 +200,7 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
             val runnable = object : Runnable {
                 override fun run() {
                     val bundle = Bundle()
-                    bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_MSG)
+                    bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_SERVICE_MSG)
                     bundle.putString(Constant.Parms.SUBCOMMANDER, commander)
                     bundle.putAll(params)
                     callService(bundle, callback)

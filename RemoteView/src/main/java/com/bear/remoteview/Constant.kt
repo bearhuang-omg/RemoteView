@@ -19,12 +19,16 @@ object Constant {
         //参数
         val PARAMS = "params"
 
-        //内部支持的指令
-        val BIND_SERVICE = "bind_service" //绑定服务，用于service和client端互相发送消息
+        //一级指令
+        val SEND_TO_SERVICE_MSG = "send_to_service_msg" //client端给service发送消息，callback当中保持一致
+        val SEND_TO_CLIENT_MSG = "send_to_client_msg" //给client端发送消息，callback当中保持一致
+
+
+        //二级指令
+        val LISTENER = "listen"//客户端监听某个事件
+        val BIND_CLIENT = "bind_client" //绑定服务，用于service和client端互相发送消息
         val BIND_SURFACEPKG = "bind_surface_pkg" //绑定surfacepkg，用于远程渲染
 
-        val SEND_MSG = "send_msg" //给service发送消息
-        val LISTENER = "listener" //监听一些事件
     }
 
     object Parms {
@@ -36,6 +40,7 @@ object Constant {
         val SUBCOMMANDER = "sub_cmd"
 
 
+        val EVENT = "event"
         val CLIENT_BINDER = "client_binder"
         val CHANNEL = "channel"
         val DISPLAY_ID = "display_id"

@@ -12,7 +12,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 
-class Ipc(val context: Context, val remoteViewId: String) {
+class IpcClient(val context: Context, val remoteViewId: String) {
 
     val TAG = "IPC"
     val PKG = "com.bear.remoteviewhost"
@@ -57,6 +57,10 @@ class Ipc(val context: Context, val remoteViewId: String) {
                     callback?.let {
                         mCallbackMap.remove(msg.what)
                         val timeoutResult = Bundle()
+                        timeoutResult.putString(
+                            Constant.Request.CMDER,
+                            Constant.Request.SEND_TO_CLIENT_MSG
+                        )
                         timeoutResult.putInt(
                             Constant.Response.RESULT_CODE,
                             Constant.Response.TIMEOUT
@@ -71,12 +75,33 @@ class Ipc(val context: Context, val remoteViewId: String) {
         mClientBinder = object : RemoteCall.Stub() {
             override fun call(bundle: Bundle?) {
                 post {
-                    //服务端调用客户端会走到这里
-                    val callId = bundle?.getInt(Constant.Parms.CALLID)
-                    callId?.let {
-                        mHandler.removeMessages(callId)
-                        mCallbackMap[it]?.invoke(bundle)
-                        mCallbackMap.remove(callId)
+                    val cmd = bundle?.getString(Constant.Request.CMDER)
+                    if (cmd == null) {
+                        return@post
+                    }
+                    try {
+                        when (cmd) {
+                            Constant.Request.SEND_TO_SERVICE_MSG -> {//客户端给服务端发消息的回调
+                                val callId = bundle.getBundle(Constant.Request.PARAMS)
+                                    ?.getInt(Constant.Parms.CALLID)
+                                callId?.let {
+                                    mHandler.removeMessages(it)
+                                    mCallbackMap[it]?.invoke(bundle)
+                                    mCallbackMap.remove(it)
+                                }
+                            }
+
+                            Constant.Request.SEND_TO_CLIENT_MSG -> {//服务端主动给客户端发送的消息
+                                val parms = bundle.getBundle(Constant.Request.PARAMS)
+                                val subCommander = parms?.getString(Constant.Parms.SUBCOMMANDER)
+                                if (subCommander == Constant.Request.LISTENER) {
+                                    val event = parms.getString(Constant.Parms.EVENT)
+                                    mListenerMap[event]?.invoke(bundle)
+                                }
+                            }
+                        }
+                    } catch (ex: Exception) {
+                        Log.e(TAG, ex.toString())
                     }
                 }
             }
@@ -124,6 +149,9 @@ class Ipc(val context: Context, val remoteViewId: String) {
         mHandler.sendEmptyMessageDelayed(MSG_SERVICE_RECONNECT, gapTime)
     }
 
+    /**
+     * 绑定服务
+     */
     fun bindService() {
         post {
             val intent = Intent().setComponent(ComponentName(PKG, SERVICE_CLASS))
@@ -131,10 +159,13 @@ class Ipc(val context: Context, val remoteViewId: String) {
         }
     }
 
-    fun callService(bundle: Bundle, callback: ((result: Bundle?) -> Unit)?) {
+    /**
+     * 调用服务端
+     */
+    fun call(params: Bundle, callback: ((result: Bundle?) -> Unit)? = null) {
         post {
             if (mServiceConnectState == Constant.SERVICE_CONNECTED) {
-                realCallService(bundle, callback)
+                realCallService(params, callback)
             } else {
                 //若服务未连接，则先将请求加入到pendding队列当中
                 if (mPendingTask.size > MAX_CALL_QUEUE) {
@@ -142,24 +173,47 @@ class Ipc(val context: Context, val remoteViewId: String) {
                     first.run()
                 } else {
                     val task = Runnable {
-                        realCallService(bundle, callback)
+                        realCallService(params, callback)
                     }
                     mPendingTask.addLast(task)
-                    mHandler.postDelayed(object :Runnable{
+                    mHandler.postDelayed(object : Runnable {
                         override fun run() {
-                            if (mPendingTask.contains(task)){
+                            if (mPendingTask.contains(task)) {
                                 task.run()
                             }
                         }
-                    },Constant.TIMEOUT)
+                    }, Constant.TIMEOUT)
                 }
             }
         }
     }
 
-    private fun realCallService(bundle: Bundle, callback: ((result: Bundle?) -> Unit)?) {
+    /**
+     * 监听某个事件
+     */
+    fun onListen(event: String, callback: ((result: Bundle?) -> Unit)) {
+        post {
+            mListenerMap[event] = callback
+            val params = Bundle()
+            params.putString(Constant.Parms.SUBCOMMANDER, Constant.Request.LISTENER)
+            params.putString(Constant.Parms.EVENT, event)
+            call(params)
+        }
+    }
+
+    /**
+     * 取消监听某个事件
+     */
+    fun offListen(event: String) {
+        post {
+            mListenerMap.remove(event)
+        }
+    }
+
+    private fun realCallService(params: Bundle, callback: ((result: Bundle?) -> Unit)?) {
         if (mServiceConnectState == Constant.SERVICE_CONNECTED) {
-            val params = bundle.getBundle(Constant.Request.PARAMS) ?: Bundle()
+            val bundle = Bundle()
+            bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
             val callId = Utils.generateCallId()
             params.putString(Constant.Parms.REMOTEVIEW_ID, remoteViewId)
             params.putString(Constant.Parms.PROCESSNAME, mProcessName)
@@ -177,27 +231,27 @@ class Ipc(val context: Context, val remoteViewId: String) {
             mHandler.sendMessageDelayed(msg, Constant.TIMEOUT)
         } else {
             callback?.let {
-                val serviceDisconnectResult = Bundle()
-                serviceDisconnectResult.putInt(
+                val result = Bundle()
+                result.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
+                result.putBundle(Constant.Request.PARAMS, params)
+                result.putInt(
                     Constant.Response.RESULT_CODE,
                     Constant.Response.SERVICE_DISCONNECT
                 )
-                serviceDisconnectResult.putString(
+                result.putString(
                     Constant.Response.RESULT_MSG,
                     "service disconnect"
                 )
-                it.invoke(serviceDisconnectResult)
+                it.invoke(result)
             }
         }
     }
 
     private fun bindClient() {
-        val bundle = Bundle()
-        bundle.putString(Constant.Request.CMDER, Constant.Request.BIND_SERVICE)
         val params = Bundle()
+        params.putString(Constant.Parms.SUBCOMMANDER, Constant.Request.BIND_CLIENT)
         params.putBinder(Constant.Parms.CLIENT_BINDER, mClientBinder.asBinder())
-        bundle.putBundle(Constant.Request.PARAMS, params)
-        callService(bundle) { result: Bundle? ->
+        call(params) { result: Bundle? ->
             val code = result?.getInt(Constant.Response.RESULT_CODE)
             val msg = result?.getString(Constant.Response.RESULT_MSG)
             Log.i(TAG, "bind remote service, code:$code , msg: $msg")

@@ -53,7 +53,7 @@ object RemoteHost {
         val processName = bundle.getString(Constant.Parms.PROCESSNAME)
         val callId = bundle.getInt(Constant.Parms.CALLID)
         when (cmd) {
-            Request.BIND_SERVICE -> {//绑定服务
+            Request.BIND_CLIENT -> {//绑定服务
                 val clientBinder = bundle.getBinder(Constant.Parms.CLIENT_BINDER)
                 val clientCall = RemoteCall.Stub.asInterface(clientBinder)
                 if (processName != null && clientBinder != null && remoteViewId != null) {

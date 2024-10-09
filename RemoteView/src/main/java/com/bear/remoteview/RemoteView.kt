@@ -249,6 +249,4 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
         mListenerMap.clear()
         mCallbackMap.clear()
     }
-
-
 }

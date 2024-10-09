@@ -7,8 +7,6 @@ import com.bear.remoteview.RemoteCall
 
 class Service : Service() {
 
-
-
     private val TAG = "RemoteViewService"
 
     override fun onCreate() {

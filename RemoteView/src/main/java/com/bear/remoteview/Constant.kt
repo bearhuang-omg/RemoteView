@@ -16,7 +16,10 @@ object Constant {
         //请求指令
         val CMDER = "cmder"
 
-        //支持的指令
+        //参数
+        val PARAMS = "params"
+
+        //内部支持的指令
         val BIND_SERVICE = "bind_service" //绑定服务，用于service和client端互相发送消息
         val BIND_SURFACEPKG = "bind_surface_pkg" //绑定surfacepkg，用于远程渲染
 
@@ -25,7 +28,7 @@ object Constant {
     }
 
     object Parms {
-        //参数
+        //公共参数
         val PROCESSNAME = "process_name"
         val REMOTEVIEW_ID = "remote_view_id"
         val CALLID = "call_id"
@@ -45,10 +48,12 @@ object Constant {
     object Response {
         val RESULT_CODE = "result_code"
         val RESULT_MSG = "result_msg"
+        val RESULTS = "results"
 
         val SUCCESS = 0
         val FAILED = -1
         val TIMEOUT = -2
+        val SERVICE_DISCONNECT = -3
     }
 
 }

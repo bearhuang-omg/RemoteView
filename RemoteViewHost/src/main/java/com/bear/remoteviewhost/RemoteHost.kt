@@ -14,7 +14,11 @@ import com.bear.remoteview.RemoteCall
 
 object RemoteHost {
 
-    data class RemoteClient(val remoteViewId: String, val processName: String, val binder: RemoteCall)
+    data class RemoteClient(
+        val remoteViewId: String,
+        val processName: String,
+        val binder: RemoteCall
+    )
 
     private val TAG = "RemoteHost"
     private var mContext: Context? = null
@@ -41,7 +45,7 @@ object RemoteHost {
         if (bundle == null) {
             return
         }
-        if (mContext == null){
+        if (mContext == null) {
             return
         }
         val cmd = bundle.getString(Request.CMDER)
@@ -62,7 +66,7 @@ object RemoteHost {
                     }, 0)
 
                     val response = Bundle()
-                    response.putInt(Constant.Parms.CALLID,callId)
+                    response.putInt(Constant.Parms.CALLID, callId)
                     response.putInt(Constant.Response.RESULT_CODE, Constant.Response.SUCCESS)
                     response.putString(Constant.Response.RESULT_MSG, "success")
                     clientCall.call(response)
@@ -75,8 +79,10 @@ object RemoteHost {
                     val displayId = bundle.getInt(Constant.Parms.DISPLAY_ID)
                     val hostToken = bundle.getBinder(Constant.Parms.HOST_TOKEN)
                     val display =
-                        mContext!!.getSystemService(DisplayManager::class.java)!!.getDisplay(displayId)
-                    val surfaceControlViewHost = SurfaceControlViewHost(mContext!!, display, hostToken)
+                        mContext!!.getSystemService(DisplayManager::class.java)!!
+                            .getDisplay(displayId)
+                    val surfaceControlViewHost =
+                        SurfaceControlViewHost(mContext!!, display, hostToken)
                     mSurfaceControllerMap[channel] = surfaceControlViewHost
                 }
                 val surfacePkg: SurfacePackage? = mSurfaceControllerMap[channel]?.surfacePackage
@@ -84,7 +90,7 @@ object RemoteHost {
                 if (surfacePkg != null) {
                     clientCallback?.let {
                         val response = Bundle()
-                        response.putInt(Constant.Parms.CALLID,callId)
+                        response.putInt(Constant.Parms.CALLID, callId)
                         response.putInt(Constant.Response.RESULT_CODE, Constant.Response.SUCCESS)
                         response.putString(Constant.Response.RESULT_MSG, "success")
                         response.putParcelable(Constant.Parms.SURFACEPKG, surfacePkg)
@@ -93,7 +99,7 @@ object RemoteHost {
                 } else {
                     clientCallback?.let {
                         val response = Bundle()
-                        response.putInt(Constant.Parms.CALLID,callId)
+                        response.putInt(Constant.Parms.CALLID, callId)
                         response.putInt(Constant.Response.RESULT_CODE, Constant.Response.FAILED)
                         response.putString(Constant.Response.RESULT_MSG, "surfacepkg is null")
                         it.call(response)
@@ -103,7 +109,7 @@ object RemoteHost {
         }
     }
 
-    internal fun getServiceBinder():IBinder {
+    internal fun getServiceBinder(): IBinder {
         return mServiceBinder
     }
 

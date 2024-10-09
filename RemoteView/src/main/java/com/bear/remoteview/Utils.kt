@@ -32,7 +32,10 @@ object Utils {
     private var callId = ThreadLocal.withInitial { 0 }
 
     fun generateCallId(): Int {
-        val nextCallId = callId.get() + 1
+        var nextCallId = 0
+        if (callId.get() < Int.MAX_VALUE) {
+            nextCallId = callId.get() + 1
+        }
         callId.set(nextCallId)
         return nextCallId
     }

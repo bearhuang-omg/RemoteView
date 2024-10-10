@@ -11,7 +11,7 @@ import com.bear.remoteview.RemoteCall
 class IpcService(val context: Context) {
 
     data class RemoteClient(
-        val identity: String,
+        val identity: Int,
         val processName: String,
         val binder: RemoteCall
     )
@@ -19,8 +19,8 @@ class IpcService(val context: Context) {
     private val TAG = "IpcService"
     private var handler: Handler
     private var handlerThread: HandlerThread
-    private val mClientMap = HashMap<String, RemoteClient>()
-    private val mListenerMap = HashMap<String, HashSet<String>>()
+    private val mClientMap = HashMap<Int, RemoteClient>()
+    private val mListenerMap = HashMap<String, HashSet<Int>>()
     private var mClientCall: ((Bundle) -> Unit)? = null
 
     init {
@@ -46,7 +46,7 @@ class IpcService(val context: Context) {
             return
         }
         val subCmd = params.getString(Constant.Parms.SUBCOMMANDER)
-        val identity = params.getString(Constant.Parms.IDENTITY)
+        val identity = params.getInt(Constant.Parms.IDENTITY)
         val processName = params.getString(Constant.Parms.PROCESSNAME)
         when (subCmd) {
             Constant.Request.BIND_CLIENT -> {//绑定服务
@@ -58,14 +58,14 @@ class IpcService(val context: Context) {
                         override fun binderDied() {
                             mClientMap.remove(identity)
                             mListenerMap.forEach { key, value ->
-                                var tobeRemoved: String? = null
+                                var tobeRemoved: Int? = null
                                 value.forEach { item ->
                                     if (item == identity) {
                                         tobeRemoved = item
                                     }
                                 }
-                                if (value.contains(tobeRemoved)) {
-                                    value.remove(tobeRemoved)
+                                tobeRemoved?.let {
+                                    value.remove(it)
                                 }
                             }
                         }
@@ -106,6 +106,10 @@ class IpcService(val context: Context) {
         }
     }
 
+    fun getClient(identity: Int): RemoteClient? {
+        return mClientMap[identity]
+    }
+
     fun sendEvent(event: String, params: Bundle?) {
         val bundle = Bundle()
         val innerParams = Bundle()
@@ -118,7 +122,7 @@ class IpcService(val context: Context) {
         }
     }
 
-    fun sendMsg(identity: String, params: Bundle) {
+    fun sendMsg(identity: Int, params: Bundle) {
         val bundle = Bundle()
         bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
         bundle.putBundle(Constant.Request.PARAMS, params)

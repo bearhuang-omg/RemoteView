@@ -12,7 +12,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 
-class IpcClient(val context: Context, val identity: String) {
+class IpcClient(val context: Context, val identity: Int) {
 
     val TAG = "IPC"
     val PKG = "com.bear.remoteviewhost"
@@ -227,7 +227,7 @@ class IpcClient(val context: Context, val identity: String) {
             val bundle = Bundle()
             bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
             val callId = Utils.generateCallId()
-            params.putString(Constant.Parms.IDENTITY, identity)
+            params.putInt(Constant.Parms.IDENTITY, identity)
             params.putString(Constant.Parms.PROCESSNAME, mProcessName)
             params.putInt(Constant.Parms.CALLID, callId)
             bundle.putBundle(Constant.Request.PARAMS, params)

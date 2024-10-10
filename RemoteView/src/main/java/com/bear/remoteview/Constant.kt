@@ -2,7 +2,6 @@ package com.bear.remoteview
 
 object Constant {
 
-    val DEFAULT_CHANNEL = 0
     val TIMEOUT = 5000L
 
     val MAX_RECONNECT_TIME = 3
@@ -43,7 +42,6 @@ object Constant {
 
         val EVENT = "event"
         val CLIENT_BINDER = "client_binder"
-        val CHANNEL = "channel"
         val DISPLAY_ID = "display_id"
         val WIDTH = "width"
         val HEIGHT = "height"

@@ -111,7 +111,7 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
     private fun callService(bundle: Bundle, callback: ((result: Bundle?) -> Unit)?) {
         mHandler.post {
             val callId = Utils.generateCallId()
-            bundle.putString(Constant.Parms.REMOTEVIEW_ID, mRemoteViewId)
+            bundle.putString(Constant.Parms.IDENTITY, mRemoteViewId)
             bundle.putString(Constant.Parms.PROCESSNAME, mProcessName)
             bundle.putInt(Constant.Parms.CALLID, callId)
             callback?.let {
@@ -223,7 +223,7 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
                     val bundle = Bundle()
                     bundle.putString(Constant.Request.CMDER, Constant.Request.LISTENER)
                     bundle.putString(Constant.Parms.SUBCOMMANDER, event)
-                    bundle.putString(Constant.Parms.REMOTEVIEW_ID, mRemoteViewId)
+                    bundle.putString(Constant.Parms.IDENTITY, mRemoteViewId)
                     bundle.putString(Constant.Parms.PROCESSNAME, mProcessName)
                     bundle.putInt(Constant.Parms.CALLID, callId)
                     mListenerMap[event] = callback

@@ -8,14 +8,17 @@ import com.bear.remoteview.RemoteCall
 class Service : Service() {
 
     private val TAG = "RemoteViewService"
+    private val ipcService by lazy {
+        IpcService(this)
+    }
 
     override fun onCreate() {
         super.onCreate()
-        RemoteHost.onServiceCreated(this)
+        RemoteHost.onServiceCreated(this,ipcService)
     }
 
     override fun onBind(intent: Intent?): IBinder {
-        return RemoteHost.getServiceBinder()
+        return ipcService.getServiceBinder()
     }
 
     override fun onUnbind(intent: Intent?): Boolean {

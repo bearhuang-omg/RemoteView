@@ -26,6 +26,7 @@ object Constant {
 
         //二级指令
         val LISTENER = "listen"//客户端监听某个事件
+        val UNLISTEN = "unListen"//客户端取消监听某个事件
         val BIND_CLIENT = "bind_client" //绑定服务，用于service和client端互相发送消息
         val BIND_SURFACEPKG = "bind_surface_pkg" //绑定surfacepkg，用于远程渲染
 
@@ -34,7 +35,7 @@ object Constant {
     object Parms {
         //公共参数
         val PROCESSNAME = "process_name"
-        val REMOTEVIEW_ID = "remote_view_id"
+        val IDENTITY = "identity" //身份标记
         val CALLID = "call_id"
 
         val SUBCOMMANDER = "sub_cmd"

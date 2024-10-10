@@ -12,7 +12,7 @@ import android.os.Looper
 import android.os.Message
 import android.util.Log
 
-class IpcClient(val context: Context, val remoteViewId: String) {
+class IpcClient(val context: Context, val identity: String) {
 
     val TAG = "IPC"
     val PKG = "com.bear.remoteviewhost"
@@ -38,6 +38,7 @@ class IpcClient(val context: Context, val remoteViewId: String) {
     private val mCallbackMap = HashMap<Int, (Bundle) -> Unit>()
     private val mListenerMap = HashMap<String, (Bundle) -> Unit>()
     private val mPendingTask = ArrayDeque<Runnable>()
+    private var mServiceCall: ((Bundle) -> Unit)? = null
 
     init {
         mHandlerThread = HandlerThread(TAG)
@@ -97,6 +98,8 @@ class IpcClient(val context: Context, val remoteViewId: String) {
                                 if (subCommander == Constant.Request.LISTENER) {
                                     val event = parms.getString(Constant.Parms.EVENT)
                                     mListenerMap[event]?.invoke(bundle)
+                                } else {
+                                    mServiceCall?.invoke(bundle)
                                 }
                             }
                         }
@@ -180,12 +183,17 @@ class IpcClient(val context: Context, val remoteViewId: String) {
                         override fun run() {
                             if (mPendingTask.contains(task)) {
                                 task.run()
+                                mPendingTask.remove(task)
                             }
                         }
                     }, Constant.TIMEOUT)
                 }
             }
         }
+    }
+
+    fun handleServiceCall(serviceCall: (Bundle) -> Unit) {
+        this.mServiceCall = serviceCall
     }
 
     /**
@@ -207,6 +215,10 @@ class IpcClient(val context: Context, val remoteViewId: String) {
     fun offListen(event: String) {
         post {
             mListenerMap.remove(event)
+            val params = Bundle()
+            params.putString(Constant.Parms.SUBCOMMANDER, Constant.Request.UNLISTEN)
+            params.putString(Constant.Parms.EVENT, event)
+            call(params)
         }
     }
 
@@ -215,7 +227,7 @@ class IpcClient(val context: Context, val remoteViewId: String) {
             val bundle = Bundle()
             bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
             val callId = Utils.generateCallId()
-            params.putString(Constant.Parms.REMOTEVIEW_ID, remoteViewId)
+            params.putString(Constant.Parms.IDENTITY, identity)
             params.putString(Constant.Parms.PROCESSNAME, mProcessName)
             params.putInt(Constant.Parms.CALLID, callId)
             bundle.putBundle(Constant.Request.PARAMS, params)

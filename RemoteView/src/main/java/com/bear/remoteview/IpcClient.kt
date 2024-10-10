@@ -116,13 +116,8 @@ class IpcClient(val context: Context, val identity: Int) {
             post {
                 Log.i(TAG, "service connected")
                 mHandler.removeMessages(MSG_SERVICE_RECONNECT)
-                mServiceConnectState = Constant.SERVICE_CONNECTED
                 mServiceBinder = RemoteCall.Stub.asInterface(service)
                 bindClient()
-                mPendingTask.forEach {
-                    mHandler.post(it)
-                }
-                mPendingTask.clear()
             }
         }
 
@@ -268,7 +263,12 @@ class IpcClient(val context: Context, val identity: Int) {
             val msg = result?.getString(Constant.Response.RESULT_MSG)
             Log.i(TAG, "bind remote service, code:$code , msg: $msg")
             if (code == Constant.Response.SUCCESS) {
+                mServiceConnectState = Constant.SERVICE_CONNECTED
                 mHandler.removeMessages(MSG_REBIND_CLIENT)
+                mPendingTask.forEach {
+                    mHandler.post(it)
+                }
+                mPendingTask.clear()
             } else {
                 mHandler.sendEmptyMessageDelayed(MSG_REBIND_CLIENT, RETRY_GAP_TIME)
             }

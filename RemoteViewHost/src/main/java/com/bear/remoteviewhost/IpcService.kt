@@ -8,7 +8,7 @@ import android.os.IBinder
 import com.bear.remoteview.Constant
 import com.bear.remoteview.RemoteCall
 
-class IpcService(val context: Context) {
+internal class IpcService(val context: Context) {
 
     data class RemoteClient(
         val identity: Int,
@@ -52,7 +52,7 @@ class IpcService(val context: Context) {
             Constant.Request.BIND_CLIENT -> {//绑定服务
                 val clientBinder = params.getBinder(Constant.Parms.CLIENT_BINDER)
                 val clientCall = RemoteCall.Stub.asInterface(clientBinder)
-                if (processName != null && clientBinder != null && identity != null) {
+                if (processName != null && clientBinder != null) {
                     mClientMap[identity] = RemoteClient(identity, processName, clientCall)
                     clientBinder.linkToDeath(object : IBinder.DeathRecipient {
                         override fun binderDied() {

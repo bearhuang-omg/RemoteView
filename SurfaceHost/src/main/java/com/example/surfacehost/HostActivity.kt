@@ -2,22 +2,23 @@ package com.example.surfacehost
 
 import android.annotation.SuppressLint
 import android.graphics.PixelFormat
+import android.nfc.Tag
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.SurfaceControlViewHost
 import android.view.SurfaceControlViewHost.SurfacePackage
 import android.view.SurfaceView
-import android.view.ViewGroup.MarginLayoutParams
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.core.view.marginTop
+import com.bear.remoteviewhost.RemoteHost
 
 class HostActivity : ComponentActivity() {
 
-    val tag = "HostActivity_"
+    val Tag = "HostActivity_"
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,12 +29,19 @@ class HostActivity : ComponentActivity() {
         val textView = findViewById<TextView>(R.id.testTextView)
         textView.setOnClickListener {
             Toast.makeText(this, "testHost", Toast.LENGTH_SHORT).show()
+            val imageView = ImageView(this)
+            imageView.background = resources.getDrawable(R.mipmap.test)
+            RemoteHost.setView(1,imageView,60,60)
+        }
+        RemoteHost.setClientMsgHandler { bundle: Bundle ->
+            Log.i(Tag,"recived client msg,${bundle}")
         }
 
-        createSurfaceView()
+//        createSurfaceView()
     }
 
     fun createSurfaceView(){
+
         val root = findViewById<FrameLayout>(R.id.root)
         val handler = Handler()
         handler.post {

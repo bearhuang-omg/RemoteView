@@ -19,6 +19,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.bear.remoteview.RemoteView
 
 const val MSG_SURFACE_DISPLAY = 1
 const val MSG_SURFACE_PACKAGE = 2
@@ -27,13 +28,6 @@ const val TAG = "ClientActivity"
 
 class ClientActivity : ComponentActivity() {
 
-    val surfaceview by lazy {
-        findViewById<SurfaceView>(R.id.client_surfaceView)
-    }
-
-    val handler = InternalHandler(Looper.getMainLooper())
-    val handleMessenger = Messenger(handler)
-    var remoteMessenger: Messenger? = null
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,68 +35,18 @@ class ClientActivity : ComponentActivity() {
         setContentView(R.layout.client_layout)
         findViewById<TextView>(R.id.testTextView).setOnClickListener {
             Toast.makeText(this, "testClient", Toast.LENGTH_SHORT).show()
-            bindSurfaceService()
+
         }
-//        val root = findViewById<FrameLayout>(R.id.root)
-        surfaceview.setZOrderOnTop(true)
-        surfaceview.holder.setFormat(PixelFormat.TRANSLUCENT)
+        val remoteView = RemoteView(this)
+        findViewById<FrameLayout>(R.id.root).addView(remoteView)
+        remoteView.start(1)
+
     }
 
-    inner class InternalHandler(looper: Looper) : Handler(looper) {
-        override fun handleMessage(msg: Message) {
-            if (msg.what == MSG_SURFACE_PACKAGE) {
-                val data = msg.data
-                val surfacePackage: SurfacePackage = data.getParcelable("surfacePkg")!!
-                surfaceview.setChildSurfacePackage(surfacePackage)
-            }
-        }
-    }
 
-    fun bindSurfaceService() {
-        Log.i(TAG,"bindSurfaceService")
-        val intent = Intent().setComponent(
-            ComponentName(
-                "com.example.surfacehost",
-                "com.example.surfacehost.HostService"
-            )
-        )
-        bindService(intent, object : ServiceConnection {
-            override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                Log.i(TAG, "service connected")
-                handler.post {
-                    remoteMessenger = Messenger(service)
-                    val msg = obtainSurfaceDisplay(
-                        surfaceview.hostToken,
-                        surfaceview.display.displayId,
-                        surfaceview.width,
-                        surfaceview.height
-                    )
-                    msg?.replyTo = handleMessenger
-                    remoteMessenger?.send(msg)
-                }
-            }
 
-            override fun onServiceDisconnected(name: ComponentName?) {
-                Log.i(TAG, "service disconnected")
-            }
 
-        }, Context.BIND_AUTO_CREATE)
-    }
 
-    fun obtainSurfaceDisplay(
-        hostToken: IBinder?,
-        displayId: Int,
-        width: Int,
-        height: Int
-    ): Message? {
-        val msg = Message.obtain()
-        msg.what = MSG_SURFACE_DISPLAY
-        val bundle = msg.data
-        bundle.putBinder("hostToken", hostToken)
-        bundle.putInt("displayId", displayId)
-        bundle.putInt("width", width)
-        bundle.putInt("height", height)
-        return msg
-    }
+
 
 }

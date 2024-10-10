@@ -4,6 +4,7 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.view.SurfaceControlViewHost
+import android.view.View
 import com.bear.remoteview.Constant
 
 
@@ -12,7 +13,7 @@ object RemoteHost {
     private var mContext: Context? = null
     private var ipcService: IpcService? = null
     private val mSurfaceControllerMap = HashMap<Int, SurfaceControlViewHost>()
-    private val outHandlerClientMsg: ((Bundle) -> Unit)? = null
+    private var outHandlerClientMsg: ((Bundle) -> Unit)? = null
 
     internal fun onServiceCreated(context: Context, ipcService: IpcService) {
         this.mContext = context
@@ -66,6 +67,16 @@ object RemoteHost {
             }
         } else {
             outHandlerClientMsg?.invoke(bundle)
+        }
+    }
+
+    fun setClientMsgHandler(msgHandler: (Bundle) -> Unit) {
+        this.outHandlerClientMsg = msgHandler
+    }
+
+    fun setView(identity: Int, view: View, width: Int, height: Int) {
+        mSurfaceControllerMap[identity]?.let {
+            it.setView(view, width, height)
         }
     }
 

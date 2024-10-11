@@ -28,7 +28,7 @@ class IpcClient(val context: Context, val identity: Int) {
     private var mHandler: Handler
     private var mHandlerThread: HandlerThread
     private var mReconnectTime = 0
-    private var mServiceConnectState = Constant.SERVICE_DISCONNECTED //服务的连接状态
+    private var mServiceConnectState = Constant.ConnectState.SERVICE_DISCONNECTED //服务的连接状态
     private var mServiceBinder: RemoteCall? = null //服务端的binder
     private var mClientBinder: RemoteCall //客户端的binder
     private val mProcessName: String by lazy {
@@ -39,6 +39,8 @@ class IpcClient(val context: Context, val identity: Int) {
     private val mListenerMap = HashMap<String, (Bundle) -> Unit>()
     private val mPendingTask = ArrayDeque<Runnable>()
     private var mServiceCall: ((Bundle) -> Unit)? = null
+    private var mStateChangeListener: ((Constant.ConnectState) -> Unit)? = null
+
 
     init {
         mHandlerThread = HandlerThread(TAG)
@@ -76,7 +78,7 @@ class IpcClient(val context: Context, val identity: Int) {
         mClientBinder = object : RemoteCall.Stub() {
             override fun call(bundle: Bundle?) {
                 post {
-                    Log.i(TAG,"recieved service call, ${Utils.getBundleStr(bundle)}")
+                    Log.i(TAG, "recieved service call, ${Utils.getBundleStr(bundle)}")
                     val cmd = bundle?.getString(Constant.Request.CMDER)
                     if (cmd == null) {
                         return@post
@@ -125,8 +127,9 @@ class IpcClient(val context: Context, val identity: Int) {
         override fun onServiceDisconnected(name: ComponentName?) {
             post {
                 Log.i(TAG, "service disconnected")
-                mServiceConnectState = Constant.SERVICE_DISCONNECTED
+                mServiceConnectState = Constant.ConnectState.SERVICE_DISCONNECTED
                 mHandler.removeMessages(MSG_REBIND_CLIENT)
+                mStateChangeListener?.invoke(mServiceConnectState)
                 reConnect()
             }
         }
@@ -163,7 +166,7 @@ class IpcClient(val context: Context, val identity: Int) {
      */
     fun call(params: Bundle, callback: ((result: Bundle?) -> Unit)? = null) {
         post {
-            if (mServiceConnectState == Constant.SERVICE_CONNECTED ) {
+            if (mServiceConnectState == Constant.ConnectState.SERVICE_CONNECTED) {
                 realCallService(params, callback)
             } else {
                 //若服务未连接，则先将请求加入到pendding队列当中
@@ -172,7 +175,7 @@ class IpcClient(val context: Context, val identity: Int) {
                     first.run()
                 } else {
                     val task = Runnable {
-                        if (mServiceConnectState == Constant.SERVICE_CONNECTED) {
+                        if (mServiceConnectState == Constant.ConnectState.SERVICE_CONNECTED) {
                             realCallService(params, callback)
                         } else {
                             callback?.let {
@@ -267,17 +270,27 @@ class IpcClient(val context: Context, val identity: Int) {
             val msg = result?.getString(Constant.Response.RESULT_MSG)
             Log.i(TAG, "bind remote service, code:$code , msg: $msg")
             if (code == Constant.Response.SUCCESS) {
-                mServiceConnectState = Constant.SERVICE_CONNECTED
+                mServiceConnectState = Constant.ConnectState.SERVICE_CONNECTED
                 mHandler.removeMessages(MSG_REBIND_CLIENT)
                 mPendingTask.forEach {
                     mHandler.post(it)
                 }
                 mPendingTask.clear()
+                this.mStateChangeListener?.invoke(mServiceConnectState)
             } else {
                 mHandler.sendEmptyMessageDelayed(MSG_REBIND_CLIENT, RETRY_GAP_TIME)
             }
         }
     }
 
+    fun setConnectStateChangeListener(listener: (Constant.ConnectState) -> Unit) {
+        this.mStateChangeListener = listener
+    }
 
+    fun release() {
+        mPendingTask.clear()
+        mListenerMap.clear()
+        mCallbackMap.clear()
+        mStateChangeListener = null
+    }
 }

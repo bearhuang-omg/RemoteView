@@ -9,9 +9,9 @@ object Constant {
     val MAX_RECONNECT_TIME = 3
     val WAIT_TIME = 3000L
 
-    val SERVICE_CONNECTED = 0
-    val SERVICE_DISCONNECTED = 1
-    val SERVICE_CONNECTING = 2
+    enum class ConnectState {
+        SERVICE_CONNECTED, SERVICE_DISCONNECTED
+    }
 
     object Request {
         //请求指令

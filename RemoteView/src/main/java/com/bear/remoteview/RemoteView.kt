@@ -49,8 +49,12 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
         mIdentity = identity
         ipcClient = IpcClient(context, identity)
         ipcClient?.bindService()
-        bindSurfacePkg()
-        Log.i(TAG,"width:${mSurfaceView.width},height:${mSurfaceView.height}")
+        ipcClient?.setConnectStateChangeListener { connectState ->
+            if (connectState == Constant.ConnectState.SERVICE_CONNECTED) {
+                bindSurfacePkg()
+            }
+        }
+        Log.i(TAG, "width:${mSurfaceView.width},height:${mSurfaceView.height}")
     }
 
     private fun bindSurfacePkg() {
@@ -91,6 +95,6 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
     }
 
     fun release() {
-
+        ipcClient?.release()
     }
 }

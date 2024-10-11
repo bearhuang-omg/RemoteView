@@ -21,8 +21,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.bear.remoteview.RemoteView
 
-const val MSG_SURFACE_DISPLAY = 1
-const val MSG_SURFACE_PACKAGE = 2
+
 
 const val TAG = "ClientActivity"
 

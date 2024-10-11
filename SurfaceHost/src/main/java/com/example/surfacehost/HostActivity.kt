@@ -28,9 +28,9 @@ class HostActivity : ComponentActivity() {
         val textView = findViewById<TextView>(R.id.testTextView)
         textView.setOnClickListener {
             Toast.makeText(this, "testHost", Toast.LENGTH_SHORT).show()
-//            val imageView = ImageView(this)
-//            imageView.background = resources.getDrawable(R.mipmap.test)
-//            RemoteHost.setView(1,imageView,60,60)
+            val imageView = ImageView(this)
+            imageView.background = resources.getDrawable(R.mipmap.test)
+            RemoteHost.setView(1,imageView,560,560)
         }
         RemoteHost.setClientMsgHandler { bundle: Bundle ->
             Log.i(Tag,"recived client msg,${bundle}")

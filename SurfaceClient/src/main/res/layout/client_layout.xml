@@ -5,16 +5,22 @@
     android:layout_height="match_parent"
     android:background="@color/teal_200">
 
+    <com.bear.remoteview.RemoteView
+        android:layout_marginTop="100dp"
+        android:id="@+id/remoteview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <TextView
         android:id="@+id/testTextView"
         android:text="client测试按钮"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
-    <FrameLayout
-        android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="100dp"/>
+<!--    <FrameLayout-->
+<!--        android:id="@+id/container"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_marginTop="100dp"/>-->
 
 </FrameLayout>

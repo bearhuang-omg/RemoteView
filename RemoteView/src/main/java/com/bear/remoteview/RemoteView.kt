@@ -1,6 +1,7 @@
 package com.bear.remoteview
 
 import android.content.Context
+import android.graphics.PixelFormat
 import android.os.Bundle
 import android.util.AttributeSet
 import android.util.Log
@@ -35,6 +36,8 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
                 super.onDetachedFromWindow()
             }
         }
+        mSurfaceView.setZOrderOnTop(true)
+        mSurfaceView.holder.setFormat(PixelFormat.TRANSLUCENT)
         this.addView(mSurfaceView)
     }
 

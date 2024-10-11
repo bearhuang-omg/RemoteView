@@ -4,8 +4,10 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.provider.Contacts.Intents.UI
+import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
 import android.view.View
+import android.widget.ImageView
 import com.bear.remoteview.Constant
 import com.bear.remoteview.Utils
 
@@ -45,6 +47,10 @@ object RemoteHost {
                     val surfaceControlViewHost =
                         SurfaceControlViewHost(mContext!!, display, hostToken)
                     mSurfaceControllerMap[identity] = surfaceControlViewHost
+
+                    //test
+                    val view = LayoutInflater.from(mContext).inflate(R.layout.show_layout,null)
+                    surfaceControlViewHost.setView(view,60,60)
                 }
                 val surfacePkg: SurfaceControlViewHost.SurfacePackage? =
                     mSurfaceControllerMap[identity]?.surfacePackage

@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.graphics.PixelFormat
 import android.os.Bundle
 import android.os.Handler
+import android.provider.SyncStateContract.Constants
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
 import android.view.SurfaceControlViewHost.SurfacePackage
 import android.view.SurfaceView
@@ -13,6 +15,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.bear.remoteview.Constant
 import com.bear.remoteviewhost.RemoteHost
 
 class HostActivity : ComponentActivity() {
@@ -28,12 +31,15 @@ class HostActivity : ComponentActivity() {
         val textView = findViewById<TextView>(R.id.testTextView)
         textView.setOnClickListener {
             Toast.makeText(this, "testHost", Toast.LENGTH_SHORT).show()
-            val imageView = ImageView(this)
-            imageView.background = resources.getDrawable(R.mipmap.test)
-            RemoteHost.setView(1,imageView,560,560)
+
         }
-        RemoteHost.setClientMsgHandler { bundle: Bundle ->
-            Log.i(Tag,"recived client msg,${bundle}")
+        RemoteHost.setClientMsgHandler { bundle, client ->
+            Log.i(Tag, "recived client msg,${bundle}")
+            val view = LayoutInflater.from(this).inflate(R.layout.show_layout, null)
+            RemoteHost.setView(1, view, 560, 560)
+            bundle.putInt(Constant.Response.RESULT_CODE, Constant.Response.SUCCESS)
+            bundle.putString(Constant.Response.RESULT_MSG, "changescene success")
+            client.binder.call(bundle)
         }
 
 //        createSurfaceView()

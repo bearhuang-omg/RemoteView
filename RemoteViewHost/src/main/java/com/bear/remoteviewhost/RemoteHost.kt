@@ -17,7 +17,7 @@ object RemoteHost {
     private var mContext: Context? = null
     private var ipcService: IpcService? = null
     private val mSurfaceControllerMap = HashMap<Int, SurfaceControlViewHost>()
-    private var outHandlerClientMsg: ((Bundle) -> Unit)? = null
+    private var outHandlerClientMsg: ((Bundle, IpcService.RemoteClient) -> Unit)? = null
 
     internal fun onServiceCreated(context: Context, ipcService: IpcService) {
         this.mContext = context
@@ -72,11 +72,16 @@ object RemoteHost {
                 }
             }
         } else {
-            outHandlerClientMsg?.invoke(bundle)
+            identity?.let {
+                val remoteClient = ipcService?.getClient(it)
+                remoteClient?.let {
+                    this.outHandlerClientMsg?.invoke(bundle, remoteClient)
+                }
+            }
         }
     }
 
-    fun setClientMsgHandler(msgHandler: (Bundle) -> Unit) {
+    fun setClientMsgHandler(msgHandler: (Bundle, IpcService.RemoteClient) -> Unit) {
         this.outHandlerClientMsg = msgHandler
     }
 

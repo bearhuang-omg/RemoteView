@@ -11,7 +11,7 @@ import com.bear.remoteview.Constant
 import com.bear.remoteview.RemoteCall
 import com.bear.remoteview.Utils
 
-internal class IpcService(val context: Context) {
+class IpcService(val context: Context) {
 
     data class RemoteClient(
         val identity: Int,

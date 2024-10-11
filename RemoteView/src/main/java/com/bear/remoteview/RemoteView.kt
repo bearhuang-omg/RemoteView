@@ -81,9 +81,10 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
     }
 
 
-    fun sendMsg(commander: String, params: Bundle, callback: ((result: Bundle?) -> Unit)? = null) {
-        params.putString(Constant.Parms.SUBCOMMANDER, commander)
-        ipcClient?.call(params, callback)
+    fun sendMsg(commander: String, params: Bundle?, callback: ((result: Bundle?) -> Unit)? = null) {
+        val innerParams = params ?: Bundle()
+        innerParams.putString(Constant.Parms.SUBCOMMANDER, commander)
+        ipcClient?.call(innerParams, callback)
     }
 
     fun onListen(event: String, callback: ((result: Bundle?) -> Unit)) {

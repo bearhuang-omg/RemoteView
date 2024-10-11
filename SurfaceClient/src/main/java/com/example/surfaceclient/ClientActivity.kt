@@ -20,7 +20,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.bear.remoteview.RemoteView
-
+import com.bear.remoteview.Utils
 
 
 const val TAG = "ClientActivity"
@@ -28,7 +28,7 @@ const val TAG = "ClientActivity"
 class ClientActivity : ComponentActivity() {
 
 
-    val remoteView:RemoteView by lazy {
+    val remoteView: RemoteView by lazy {
         findViewById(R.id.remoteview)
     }
 
@@ -38,12 +38,16 @@ class ClientActivity : ComponentActivity() {
         setContentView(R.layout.client_layout)
         findViewById<TextView>(R.id.testTextView).setOnClickListener {
             Toast.makeText(this, "testClient", Toast.LENGTH_SHORT).show()
-            remoteView?.start(1)
+            remoteView.start(1)
+            remoteView.sendMsg("changeScene", null) { result: Bundle? ->
+                Log.i(TAG, "received result,${Utils.getBundleStr(result)}")
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
+
 //        remoteView?.postDelayed(object :Runnable{
 //            override fun run() {
 //                remoteView?.start(1)
@@ -52,11 +56,6 @@ class ClientActivity : ComponentActivity() {
 //        },1000)
 
     }
-
-
-
-
-
 
 
 }

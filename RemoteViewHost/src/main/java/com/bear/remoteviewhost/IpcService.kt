@@ -5,8 +5,11 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.IBinder
+import android.os.Looper
+import android.util.Log
 import com.bear.remoteview.Constant
 import com.bear.remoteview.RemoteCall
+import com.bear.remoteview.Utils
 
 internal class IpcService(val context: Context) {
 
@@ -31,7 +34,7 @@ internal class IpcService(val context: Context) {
 
     private val mServiceBinder = object : RemoteCall.Stub() {
         override fun call(bundle: Bundle?) {
-            handler.post {
+            post {
                 handleClientCall(bundle)
             }
         }
@@ -45,6 +48,7 @@ internal class IpcService(val context: Context) {
         if (params == null) {
             return
         }
+        Log.i(TAG,"handle client call, ${Utils.getBundleStr(bundle)}")
         val subCmd = params.getString(Constant.Parms.SUBCOMMANDER)
         val identity = params.getInt(Constant.Parms.IDENTITY)
         val processName = params.getString(Constant.Parms.PROCESSNAME)
@@ -111,22 +115,26 @@ internal class IpcService(val context: Context) {
     }
 
     fun sendEvent(event: String, params: Bundle?) {
-        val bundle = Bundle()
-        val innerParams = Bundle()
-        bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
-        innerParams.putAll(params)
-        innerParams.putString(Constant.Parms.SUBCOMMANDER, Constant.Request.LISTENER)
-        bundle.putBundle(Constant.Request.PARAMS, innerParams)
-        mListenerMap[event]?.forEach { item ->
-            mClientMap[item]?.binder?.call(bundle)
+        post {
+            val bundle = Bundle()
+            val innerParams = Bundle()
+            bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
+            innerParams.putAll(params)
+            innerParams.putString(Constant.Parms.SUBCOMMANDER, Constant.Request.LISTENER)
+            bundle.putBundle(Constant.Request.PARAMS, innerParams)
+            mListenerMap[event]?.forEach { item ->
+                mClientMap[item]?.binder?.call(bundle)
+            }
         }
     }
 
     fun sendMsg(identity: Int, params: Bundle) {
-        val bundle = Bundle()
-        bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
-        bundle.putBundle(Constant.Request.PARAMS, params)
-        mClientMap[identity]?.binder?.call(bundle)
+        post {
+            val bundle = Bundle()
+            bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
+            bundle.putBundle(Constant.Request.PARAMS, params)
+            mClientMap[identity]?.binder?.call(bundle)
+        }
     }
 
     fun handleClientCall(clientCall: (Bundle) -> Unit) {
@@ -135,5 +143,13 @@ internal class IpcService(val context: Context) {
 
     internal fun getServiceBinder(): IBinder {
         return mServiceBinder
+    }
+
+    fun post(runnable: Runnable) {
+        if (handler.getLooper() != Looper.myLooper()) {
+            handler.post(runnable)
+        } else {
+            runnable.run()
+        }
     }
 }

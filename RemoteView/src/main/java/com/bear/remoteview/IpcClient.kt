@@ -60,7 +60,7 @@ class IpcClient(val context: Context, val identity: Int) {
                         val timeoutResult = Bundle()
                         timeoutResult.putString(
                             Constant.Request.CMDER,
-                            Constant.Request.SEND_TO_CLIENT_MSG
+                            Constant.Request.SEND_TO_SERVICE_MSG
                         )
                         timeoutResult.putInt(
                             Constant.Response.RESULT_CODE,
@@ -76,6 +76,7 @@ class IpcClient(val context: Context, val identity: Int) {
         mClientBinder = object : RemoteCall.Stub() {
             override fun call(bundle: Bundle?) {
                 post {
+                    Log.i(TAG,"recieved service call, ${Utils.getBundleStr(bundle)}")
                     val cmd = bundle?.getString(Constant.Request.CMDER)
                     if (cmd == null) {
                         return@post
@@ -178,7 +179,7 @@ class IpcClient(val context: Context, val identity: Int) {
                                 val result = Bundle()
                                 result.putString(
                                     Constant.Request.CMDER,
-                                    Constant.Request.SEND_TO_CLIENT_MSG
+                                    Constant.Request.SEND_TO_SERVICE_MSG
                                 )
                                 result.putBundle(Constant.Request.PARAMS, params)
                                 result.putInt(
@@ -239,7 +240,7 @@ class IpcClient(val context: Context, val identity: Int) {
 
     private fun realCallService(params: Bundle, callback: ((result: Bundle?) -> Unit)?) {
         val bundle = Bundle()
-        bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
+        bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_SERVICE_MSG)
         val callId = Utils.generateCallId()
         params.putInt(Constant.Parms.IDENTITY, identity)
         params.putString(Constant.Parms.PROCESSNAME, mProcessName)

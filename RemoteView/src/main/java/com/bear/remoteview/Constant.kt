@@ -1,5 +1,7 @@
 package com.bear.remoteview
 
+import android.os.Bundle
+
 object Constant {
 
     val TIMEOUT = 5000L
@@ -20,7 +22,7 @@ object Constant {
 
         //一级指令
         val SEND_TO_SERVICE_MSG = "send_to_service_msg" //client端给service发送消息，callback当中保持一致
-        val SEND_TO_CLIENT_MSG = "send_to_client_msg" //给client端发送消息，callback当中保持一致
+        val SEND_TO_CLIENT_MSG = "send_to_client_msg" //service给client端发送消息，callback当中保持一致
 
 
         //二级指令
@@ -59,5 +61,4 @@ object Constant {
         val TIMEOUT = -2
         val SERVICE_DISCONNECT = -3
     }
-
 }

@@ -3,9 +3,11 @@ package com.bear.remoteviewhost
 import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Bundle
+import android.provider.Contacts.Intents.UI
 import android.view.SurfaceControlViewHost
 import android.view.View
 import com.bear.remoteview.Constant
+import com.bear.remoteview.Utils
 
 
 object RemoteHost {
@@ -33,36 +35,38 @@ object RemoteHost {
         val identity = parms?.getInt(Constant.Parms.IDENTITY)
         val subCmd = parms?.getString(Constant.Parms.SUBCOMMANDER)
         if (subCmd == Constant.Request.BIND_SURFACEPKG && identity != null) {//绑定surfacepkg，内部处理
-            if (!mSurfaceControllerMap.containsKey(identity)) {
-                val displayId = bundle.getInt(Constant.Parms.DISPLAY_ID)
-                val hostToken = bundle.getBinder(Constant.Parms.HOST_TOKEN)
-                val display =
-                    mContext!!.getSystemService(DisplayManager::class.java)!!
-                        .getDisplay(displayId)
-                val surfaceControlViewHost =
-                    SurfaceControlViewHost(mContext!!, display, hostToken)
-                mSurfaceControllerMap[identity] = surfaceControlViewHost
-            }
-            val surfacePkg: SurfaceControlViewHost.SurfacePackage? =
-                mSurfaceControllerMap[identity]?.surfacePackage
-            val client = ipcService?.getClient(identity)
-            if (surfacePkg != null) {
-                client?.binder?.let {
-                    val response = Bundle()
-                    response.putAll(bundle)
-                    parms.putParcelable(Constant.Parms.SURFACEPKG, surfacePkg)
-                    response.putBundle(Constant.Request.PARAMS, parms)
-                    response.putInt(Constant.Response.RESULT_CODE, Constant.Response.SUCCESS)
-                    response.putString(Constant.Response.RESULT_MSG, "success")
-                    it.call(response)
+            Utils.UI {
+                if (!mSurfaceControllerMap.containsKey(identity)) {
+                    val displayId = bundle.getInt(Constant.Parms.DISPLAY_ID)
+                    val hostToken = bundle.getBinder(Constant.Parms.HOST_TOKEN)
+                    val display =
+                        mContext!!.getSystemService(DisplayManager::class.java)!!
+                            .getDisplay(displayId)
+                    val surfaceControlViewHost =
+                        SurfaceControlViewHost(mContext!!, display, hostToken)
+                    mSurfaceControllerMap[identity] = surfaceControlViewHost
                 }
-            } else {
-                client?.binder?.let {
-                    val response = Bundle()
-                    response.putAll(bundle)
-                    response.putInt(Constant.Response.RESULT_CODE, Constant.Response.FAILED)
-                    response.putString(Constant.Response.RESULT_MSG, "surfacepkg is null")
-                    it.call(response)
+                val surfacePkg: SurfaceControlViewHost.SurfacePackage? =
+                    mSurfaceControllerMap[identity]?.surfacePackage
+                val client = ipcService?.getClient(identity)
+                if (surfacePkg != null) {
+                    client?.binder?.let {
+                        val response = Bundle()
+                        response.putAll(bundle)
+                        parms.putParcelable(Constant.Parms.SURFACEPKG, surfacePkg)
+                        response.putBundle(Constant.Request.PARAMS, parms)
+                        response.putInt(Constant.Response.RESULT_CODE, Constant.Response.SUCCESS)
+                        response.putString(Constant.Response.RESULT_MSG, "success")
+                        it.call(response)
+                    }
+                } else {
+                    client?.binder?.let {
+                        val response = Bundle()
+                        response.putAll(bundle)
+                        response.putInt(Constant.Response.RESULT_CODE, Constant.Response.FAILED)
+                        response.putString(Constant.Response.RESULT_MSG, "surfacepkg is null")
+                        it.call(response)
+                    }
                 }
             }
         } else {
@@ -75,8 +79,10 @@ object RemoteHost {
     }
 
     fun setView(identity: Int, view: View, width: Int, height: Int) {
-        mSurfaceControllerMap[identity]?.let {
-            it.setView(view, width, height)
+        Utils.UI {
+            mSurfaceControllerMap[identity]?.let {
+                it.setView(view, width, height)
+            }
         }
     }
 

@@ -50,7 +50,7 @@ object RemoteHost {
 
                     //test
                     val view = LayoutInflater.from(mContext).inflate(R.layout.show_layout,null)
-                    surfaceControlViewHost.setView(view,60,60)
+                    surfaceControlViewHost.setView(view,560,560)
                 }
                 val surfacePkg: SurfaceControlViewHost.SurfacePackage? =
                     mSurfaceControllerMap[identity]?.surfacePackage

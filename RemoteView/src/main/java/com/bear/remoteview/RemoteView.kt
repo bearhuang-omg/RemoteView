@@ -36,9 +36,13 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
                 super.onDetachedFromWindow()
             }
         }
+        this.addView(mSurfaceView)
         mSurfaceView.setZOrderOnTop(true)
         mSurfaceView.holder.setFormat(PixelFormat.TRANSLUCENT)
-        this.addView(mSurfaceView)
+        val layoutParams = mSurfaceView.layoutParams
+        layoutParams.height = LayoutParams.MATCH_PARENT
+        layoutParams.width = LayoutParams.MATCH_PARENT
+        mSurfaceView.layoutParams = layoutParams
     }
 
     fun start(identity: Int) {
@@ -46,6 +50,7 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
         ipcClient = IpcClient(context, identity)
         ipcClient?.bindService()
         bindSurfacePkg()
+        Log.i(TAG,"width:${mSurfaceView.width},height:${mSurfaceView.height}")
     }
 
     private fun bindSurfacePkg() {
@@ -59,7 +64,7 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
             Log.i(TAG, "bind surface pkg, code:$code , msg: $msg")
             if (code == Constant.Response.SUCCESS) {
                 Utils.UI {
-                    val parms = bundle.getBundle(Constant.Request.PARAMS)
+                    val parms = result.getBundle(Constant.Request.PARAMS)
                     val surfacePkg: SurfacePackage? = parms?.getParcelable(Constant.Parms.SURFACEPKG)
                     surfacePkg?.let {
                         mSurfaceView.setChildSurfacePackage(it)

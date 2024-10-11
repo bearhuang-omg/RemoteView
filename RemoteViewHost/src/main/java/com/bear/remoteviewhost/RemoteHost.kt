@@ -39,8 +39,8 @@ object RemoteHost {
         if (subCmd == Constant.Request.BIND_SURFACEPKG && identity != null) {//绑定surfacepkg，内部处理
             Utils.UI {
                 if (!mSurfaceControllerMap.containsKey(identity)) {
-                    val displayId = bundle.getInt(Constant.Parms.DISPLAY_ID)
-                    val hostToken = bundle.getBinder(Constant.Parms.HOST_TOKEN)
+                    val displayId = parms.getInt(Constant.Parms.DISPLAY_ID)
+                    val hostToken = parms.getBinder(Constant.Parms.HOST_TOKEN)
                     val display =
                         mContext!!.getSystemService(DisplayManager::class.java)!!
                             .getDisplay(displayId)

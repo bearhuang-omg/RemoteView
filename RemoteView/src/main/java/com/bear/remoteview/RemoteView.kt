@@ -58,10 +58,12 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
             val msg = result?.getString(Constant.Response.RESULT_MSG)
             Log.i(TAG, "bind surface pkg, code:$code , msg: $msg")
             if (code == Constant.Response.SUCCESS) {
-                val parms = bundle.getBundle(Constant.Request.PARAMS)
-                val surfacePkg: SurfacePackage? = parms?.getParcelable(Constant.Parms.SURFACEPKG)
-                surfacePkg?.let {
-                    mSurfaceView.setChildSurfacePackage(it)
+                Utils.UI {
+                    val parms = bundle.getBundle(Constant.Request.PARAMS)
+                    val surfacePkg: SurfacePackage? = parms?.getParcelable(Constant.Parms.SURFACEPKG)
+                    surfacePkg?.let {
+                        mSurfaceView.setChildSurfacePackage(it)
+                    }
                 }
             } else {
                 Log.i(TAG, "bind surfacepkg failed")

@@ -2,7 +2,6 @@ package com.example.surfacehost
 
 import android.annotation.SuppressLint
 import android.graphics.PixelFormat
-import android.nfc.Tag
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log

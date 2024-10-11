@@ -17,7 +17,7 @@
         <activity
             android:name=".ClientActivity"
             android:exported="true"
-            android:label="Host"
+            android:label="Client"
             android:theme="@style/Theme.Demo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

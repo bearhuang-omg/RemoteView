@@ -22,7 +22,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".HostService" android:exported="true"/>
     </application>
 
 </manifest>

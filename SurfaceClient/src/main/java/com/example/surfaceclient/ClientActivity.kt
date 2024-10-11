@@ -29,17 +29,30 @@ const val TAG = "ClientActivity"
 class ClientActivity : ComponentActivity() {
 
 
+    var remoteView:RemoteView? = null
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.client_layout)
         findViewById<TextView>(R.id.testTextView).setOnClickListener {
             Toast.makeText(this, "testClient", Toast.LENGTH_SHORT).show()
-
+            remoteView?.start(1)
         }
-        val remoteView = RemoteView(this)
-        findViewById<FrameLayout>(R.id.root).addView(remoteView)
-        remoteView.start(1)
+        remoteView = RemoteView(this)
+        findViewById<FrameLayout>(R.id.container).addView(remoteView)
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+//        remoteView?.postDelayed(object :Runnable{
+//            override fun run() {
+//                remoteView?.start(1)
+//            }
+//
+//        },1000)
 
     }
 

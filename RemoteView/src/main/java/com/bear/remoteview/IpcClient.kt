@@ -15,7 +15,7 @@ import android.util.Log
 class IpcClient(val context: Context, val identity: Int) {
 
     val TAG = "IPC"
-    val PKG = "com.bear.remoteviewhost"
+    val PKG = "com.example.surfacehost"
     val SERVICE_CLASS = "com.bear.remoteviewhost.Service"
     val RETRY_GAP_TIME = 3000L
     val MAX_RECONNECT_WAIT_TIME = 10 * 60 * 1000L //服务重连最长的时间间隔
@@ -28,7 +28,7 @@ class IpcClient(val context: Context, val identity: Int) {
     private var mHandler: Handler
     private var mHandlerThread: HandlerThread
     private var mReconnectTime = 0
-    private var mServiceConnectState = Constant.SERVICE_DISCONNECTED
+    private var mServiceConnectState = Constant.SERVICE_DISCONNECTED //服务的连接状态
     private var mServiceBinder: RemoteCall? = null //服务端的binder
     private var mClientBinder: RemoteCall //客户端的binder
     private val mProcessName: String by lazy {
@@ -162,7 +162,7 @@ class IpcClient(val context: Context, val identity: Int) {
      */
     fun call(params: Bundle, callback: ((result: Bundle?) -> Unit)? = null) {
         post {
-            if (mServiceConnectState == Constant.SERVICE_CONNECTED) {
+            if (mServiceConnectState == Constant.SERVICE_CONNECTED ) {
                 realCallService(params, callback)
             } else {
                 //若服务未连接，则先将请求加入到pendding队列当中
@@ -171,7 +171,27 @@ class IpcClient(val context: Context, val identity: Int) {
                     first.run()
                 } else {
                     val task = Runnable {
-                        realCallService(params, callback)
+                        if (mServiceConnectState == Constant.SERVICE_CONNECTED) {
+                            realCallService(params, callback)
+                        } else {
+                            callback?.let {
+                                val result = Bundle()
+                                result.putString(
+                                    Constant.Request.CMDER,
+                                    Constant.Request.SEND_TO_CLIENT_MSG
+                                )
+                                result.putBundle(Constant.Request.PARAMS, params)
+                                result.putInt(
+                                    Constant.Response.RESULT_CODE,
+                                    Constant.Response.SERVICE_DISCONNECT
+                                )
+                                result.putString(
+                                    Constant.Response.RESULT_MSG,
+                                    "service disconnect"
+                                )
+                                it.invoke(result)
+                            }
+                        }
                     }
                     mPendingTask.addLast(task)
                     mHandler.postDelayed(object : Runnable {
@@ -218,47 +238,30 @@ class IpcClient(val context: Context, val identity: Int) {
     }
 
     private fun realCallService(params: Bundle, callback: ((result: Bundle?) -> Unit)?) {
-        if (mServiceConnectState == Constant.SERVICE_CONNECTED) {
-            val bundle = Bundle()
-            bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
-            val callId = Utils.generateCallId()
-            params.putInt(Constant.Parms.IDENTITY, identity)
-            params.putString(Constant.Parms.PROCESSNAME, mProcessName)
-            params.putInt(Constant.Parms.CALLID, callId)
-            bundle.putBundle(Constant.Request.PARAMS, params)
-            callback?.let {
-                mCallbackMap[callId] = callback
-            }
-            mServiceBinder?.call(bundle)
-
-            //超时回调
-            val msg = Message.obtain()
-            msg.what = callId
-            msg.data = bundle
-            mHandler.sendMessageDelayed(msg, Constant.TIMEOUT)
-        } else {
-            callback?.let {
-                val result = Bundle()
-                result.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
-                result.putBundle(Constant.Request.PARAMS, params)
-                result.putInt(
-                    Constant.Response.RESULT_CODE,
-                    Constant.Response.SERVICE_DISCONNECT
-                )
-                result.putString(
-                    Constant.Response.RESULT_MSG,
-                    "service disconnect"
-                )
-                it.invoke(result)
-            }
+        val bundle = Bundle()
+        bundle.putString(Constant.Request.CMDER, Constant.Request.SEND_TO_CLIENT_MSG)
+        val callId = Utils.generateCallId()
+        params.putInt(Constant.Parms.IDENTITY, identity)
+        params.putString(Constant.Parms.PROCESSNAME, mProcessName)
+        params.putInt(Constant.Parms.CALLID, callId)
+        bundle.putBundle(Constant.Request.PARAMS, params)
+        callback?.let {
+            mCallbackMap[callId] = callback
         }
+        mServiceBinder?.call(bundle)
+
+        //超时回调
+        val msg = Message.obtain()
+        msg.what = callId
+        msg.data = bundle
+        mHandler.sendMessageDelayed(msg, Constant.TIMEOUT)
     }
 
     private fun bindClient() {
         val params = Bundle()
         params.putString(Constant.Parms.SUBCOMMANDER, Constant.Request.BIND_CLIENT)
         params.putBinder(Constant.Parms.CLIENT_BINDER, mClientBinder.asBinder())
-        call(params) { result: Bundle? ->
+        realCallService(params) { result: Bundle? ->
             val code = result?.getInt(Constant.Response.RESULT_CODE)
             val msg = result?.getString(Constant.Response.RESULT_MSG)
             Log.i(TAG, "bind remote service, code:$code , msg: $msg")

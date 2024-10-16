@@ -38,7 +38,7 @@ class ClientActivity : ComponentActivity() {
         setContentView(R.layout.client_layout)
         findViewById<TextView>(R.id.testTextView).setOnClickListener {
             Toast.makeText(this, "testClient", Toast.LENGTH_SHORT).show()
-            remoteView.start(1)
+            remoteView.start(1,"com.example.surfacehost")
             remoteView.sendMsg("changeScene", null) { result: Bundle? ->
                 Log.i(TAG, "received result,${Utils.getBundleStr(result)}")
             }

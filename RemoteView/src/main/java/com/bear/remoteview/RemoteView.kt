@@ -45,10 +45,10 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
         mSurfaceView.layoutParams = layoutParams
     }
 
-    fun start(identity: Int) {
+    fun start(identity: Int, servicePkg: String) {
         mIdentity = identity
         ipcClient = IpcClient(context, identity)
-        ipcClient?.bindService()
+        ipcClient?.bindService(servicePkg)
         ipcClient?.setConnectStateChangeListener { connectState ->
             if (connectState == Constant.ConnectState.SERVICE_CONNECTED) {
                 bindSurfacePkg()
@@ -69,7 +69,8 @@ class RemoteView(context: Context, attrs: AttributeSet? = null) : FrameLayout(co
             if (code == Constant.Response.SUCCESS) {
                 Utils.UI {
                     val parms = result.getBundle(Constant.Request.PARAMS)
-                    val surfacePkg: SurfacePackage? = parms?.getParcelable(Constant.Parms.SURFACEPKG)
+                    val surfacePkg: SurfacePackage? =
+                        parms?.getParcelable(Constant.Parms.SURFACEPKG)
                     surfacePkg?.let {
                         mSurfaceView.setChildSurfacePackage(it)
                     }

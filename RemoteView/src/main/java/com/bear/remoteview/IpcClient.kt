@@ -15,7 +15,6 @@ import android.util.Log
 class IpcClient(val context: Context, val identity: Int) {
 
     val TAG = "IPC"
-    val PKG = "com.example.surfacehost"
     val SERVICE_CLASS = "com.bear.remoteviewhost.Service"
     val RETRY_GAP_TIME = 3000L
     val MAX_RECONNECT_WAIT_TIME = 10 * 60 * 1000L //服务重连最长的时间间隔
@@ -34,6 +33,7 @@ class IpcClient(val context: Context, val identity: Int) {
     private val mProcessName: String by lazy {
         Utils.getProcessName(context)
     }
+    private var mServicePkg = ""
 
     private val mCallbackMap = HashMap<Int, (Bundle) -> Unit>()
     private val mListenerMap = HashMap<String, (Bundle) -> Unit>()
@@ -145,7 +145,7 @@ class IpcClient(val context: Context, val identity: Int) {
 
     private fun reConnect() {
         mHandler.removeMessages(MSG_SERVICE_RECONNECT)
-        bindService()
+        bindService(mServicePkg)
         mReconnectTime++
         val gapTime = Math.min(mReconnectTime * RETRY_GAP_TIME, MAX_RECONNECT_WAIT_TIME)
         mHandler.sendEmptyMessageDelayed(MSG_SERVICE_RECONNECT, gapTime)
@@ -154,9 +154,10 @@ class IpcClient(val context: Context, val identity: Int) {
     /**
      * 绑定服务
      */
-    fun bindService() {
+    fun bindService(pkg: String) {
         post {
-            val intent = Intent().setComponent(ComponentName(PKG, SERVICE_CLASS))
+            this.mServicePkg = pkg
+            val intent = Intent().setComponent(ComponentName(pkg, SERVICE_CLASS))
             context.bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE)
         }
     }

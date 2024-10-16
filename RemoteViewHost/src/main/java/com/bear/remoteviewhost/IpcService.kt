@@ -152,4 +152,10 @@ class IpcService(val context: Context) {
             runnable.run()
         }
     }
+
+    fun release() {
+        this.mClientCall = null
+        this.mClientMap.clear()
+        this.mListenerMap.clear()
+    }
 }

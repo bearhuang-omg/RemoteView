@@ -29,6 +29,7 @@ object RemoteHost {
 
     internal fun onServiceDestroyed() {
         this.mContext = null
+        this.ipcService?.release()
         this.ipcService = null
     }
 

@@ -1,0 +1,2 @@
+remoteView client端，绑定service之后能够显示server端渲染的画面，
+remoteViewHost server端，client端绑定之后可以通过setview接口，将服务端的画面渲染到client端

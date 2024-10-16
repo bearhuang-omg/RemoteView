@@ -255,10 +255,12 @@ class IpcClient(val context: Context, val identity: Int) {
         mServiceBinder?.call(bundle)
 
         //超时回调
-        val msg = Message.obtain()
-        msg.what = callId
-        msg.data = bundle
-        mHandler.sendMessageDelayed(msg, Constant.TIMEOUT)
+        callback?.let {
+            val msg = Message.obtain()
+            msg.what = callId
+            msg.data = bundle
+            mHandler.sendMessageDelayed(msg, Constant.TIMEOUT)
+        }
     }
 
     private fun bindClient() {

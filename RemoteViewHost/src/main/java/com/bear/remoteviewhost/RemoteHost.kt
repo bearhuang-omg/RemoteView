@@ -93,4 +93,12 @@ object RemoteHost {
         }
     }
 
+    fun sendMsgToClient(identity: Int, bundle: Bundle) {
+        ipcService?.sendMsg(identity, bundle)
+    }
+
+    fun sendEvent(event: String, bundle: Bundle?) {
+        ipcService?.sendEvent(event, bundle)
+    }
+
 }
